@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+
+import os
+from pathlib import Path
+from AIMS.utils import blockPrint, enablePrint
+blockPrint()
+from AIMS.run import run_AIMS
+enablePrint()
+
+from AIMS.preprocess import preprocess
+
+def main():
+
+    import argparse
+    parser = argparse.ArgumentParser(description="This script will allow you to predict a single case with AIMS. "
+                                                 "If you have multiple cases, please use AIMS_predict_folder (this one "
+                                                 "will be substantially faster for multiple cases because we can "
+                                                 "interleave preprocessing, GPU prediction and nifti export."
+                                                 "\n"
+                                                 "IMPORTANT!\n"
+                                                 "The input files must be brain extracted with the non-brain region being "
+                                                 "0 (you can achieve that by using hd-bet "
+                                                 "(https://github.com/MIC-DKFZ/HD-BET). Furthermore, the input files "
+                                                 "must be co-registered and in the same co-ordinate system (pixels "
+                                                 "arrays must be aligned)\n"
+                                                 "All input files must be niftis (.nii.gz)")
+    parser.add_argument("-flair", type=str, required=True,
+                        help="FLAIR input file")
+    parser.add_argument("-t2", type=str, required=True,
+                        help="T2 input file")
+    parser.add_argument("-t1", type=str, required=False,
+                        help="T1 input file")
+    parser.add_argument("-o", "--output_file", type=str, required=True,
+                        help="output filename. Must end with .nii.gz")
+    
+    parser.add_argument("--preprocess", action='store_true',
+                        help="Preprocess the MRI files (skullstrip and align)")
+    
+    parser.add_argument("-v", "--verbose", action='store_true',
+                        help="Verbose")
+    parser.add_argument("--overwrite", action='store_true',
+                        help="Overwrite the output mask (and preprocessed files if --preprocess is used)")
+
+    args = parser.parse_args()
+    t1 = args.t1
+    t2 = args.t2
+    flair = args.flair
+    output_file = args.output_file
+
+    if args.preprocess:
+        flair, t2, t1 = preprocess(flair, t2, t1, verbose=args.verbose, overwrite=args.overwrite)
+
+    if not args.t1:
+        MRIs = [flair, t2]
+        model_checkpoint_name = 'FLAIR_T2_orig'
+    else:
+        MRIs = [flair, t2, t1]
+        model_checkpoint_name = 'FLAIR_T2_T1_orig'
+    
+    run_AIMS(MRIs, output_file, model_checkpoint_name)
+    
+if __name__ == "__main__":
+    main()

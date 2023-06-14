@@ -1,0 +1,50 @@
+#!/usr/bin/env python
+
+from AIMS.utils import blockPrint, enablePrint
+blockPrint()
+from AIMS.run import run_AIMS_from_folder
+enablePrint()
+import argparse
+import os
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", "--input_folder", type=str, required=True,
+                        help="folder with input files, files must be named PATIENTID_0000.nii.gz, "
+                             "PATIENTID_0001.nii.gz, PATIENTID_0002.nii.gz for FLAIR, "
+                             "T2, and T1, respectively. There can be an arbitrary number of patients "
+                             "in the folder (PATIENTID can be anything). CAREFUL: The files MUST fullfill the "
+                             "following criteria: 1) They must be brain extracted with the non-brain region being "
+                             "0 (you can achieve that by using hd-bet (https://github.com/MIC-DKFZ/HD-BET); 2) "
+                             "They must be coregistered and in the same co-ordinate system (pixels arrays must be "
+                             "aligned) 3) make sure the files always have the correct file ending (_0000.nii.gz, ...)")
+    parser.add_argument("-o", "--output_folder", type=str, required=True,
+                        help="output folder. This is there the resulting segmentations will be saved (as PATIENT_ID."
+                             "nii.gz). Cannot be the same folder as the input folder. If output_folder does not exist "
+                             "it will be created")
+    parser.add_argument("-p", "--processes", default=4, type=str, required=False,
+                        help="number of processes for data preprocessing and nifti export. You should not have to "
+                             "touch this. So don't unless there is a clear indication that it is required. Default: 4")
+    parser.add_argument('--overwrite_existing', default=True, type=str, required=False,
+                        help="set to False to keep segmentations in output_folder and continue where you left off "
+                             "(useful if something crashes). If True then all segmentations that may already be "
+                             "present in output_folder will be overwritten. Default: True")
+
+    args = parser.parse_args()
+    input_folder = args.input_folder
+    output_folder = args.output_folder
+    processes = args.processes
+    overwrite_existing = args.overwrite_existing
+
+    if any([f.endswith('_0002.nii.gz') for f in os.listdir(input_folder)]):
+        model_checkpoint_name = 'FLAIR_T2_T1_orig'
+    elif any([f.endswith('_0001.nii.gz') for f in os.listdir(input_folder)]):
+        model_checkpoint_name = 'FLAIR_T2_orig'
+    elif any([f.endswith('_0000.nii.gz') for f in os.listdir(input_folder)]):
+        model_checkpoint_name = 'FLAIR_orig'
+
+    run_AIMS_from_folder(input_folder, output_folder, model_checkpoint_name, processes, overwrite_existing)
+
+
+if __name__ == "__main__":
+    main()
