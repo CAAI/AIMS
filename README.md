@@ -1,7 +1,4 @@
 # AIMS
-Automatic MS lesion delineation model. nnU-Net trained on 549 clinical patientients
-
-# AIMS
 Automatic delineation of MS lesions. The model, a nnU-Net, was trained on 549 clinical patients.
 
 Please cite for use:
