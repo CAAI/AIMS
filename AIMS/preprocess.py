@@ -45,10 +45,9 @@ def register(file_, reference_file, overwrite=False):
     return out_file, output
 
 """ FUNCTION INSPIRED BY https://github.com/NeuroAI-HD/HD-GLIO-AUTO/blob/master/scripts/run.py """
-def preprocess(flair, t2, t1, verbose=False, overwrite=False):
-    files = [flair, t2, t1]
-    names = ["FLAIR", "T2", "T1"]
-    output_dir = os.path.dirname(flair)
+def preprocess(files, verbose=False, overwrite=False):
+    names = ["FLAIR", "T2", "T1"] if len(files) == 3 else ["FLAIR", "T2"]
+    output_dir = os.path.dirname(files[0])
     if output_dir=='':
         output_dir = '.'
     existing_files = os.listdir(output_dir)

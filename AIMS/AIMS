@@ -35,6 +35,9 @@ def main():
     
     parser.add_argument("--preprocess", action='store_true',
                         help="Preprocess the MRI files (skullstrip and align)")
+
+    parser.add_argument("-m", "--model_name", type=str, required=False,
+                        help="Choose the model name manually. Options: FLAIR_T2_T1_TL (default), FLAIR_T2_T1_orig, FLAIR_T2_orig")
     
     parser.add_argument("-v", "--verbose", action='store_true',
                         help="Verbose")
@@ -47,15 +50,16 @@ def main():
     flair = args.flair
     output_file = args.output_file
 
-    if args.preprocess:
-        flair, t2, t1 = preprocess(flair, t2, t1, verbose=args.verbose, overwrite=args.overwrite)
-
     if not args.t1:
         MRIs = [flair, t2]
         model_checkpoint_name = 'FLAIR_T2_orig'
+        assert args.model_name is None or model_checkpoint_name == args.model_name, 'You selected a model that requires T1, but this image was not supplied.' 
     else:
         MRIs = [flair, t2, t1]
-        model_checkpoint_name = 'FLAIR_T2_T1_orig'
+        model_checkpoint_name = 'FLAIR_T2_T1_TL' if args.model_name is None else args.model_name 
+
+    if args.preprocess:
+        MRIs = preprocess(MRIs, verbose=args.verbose, overwrite=args.overwrite)
     
     run_AIMS(MRIs, output_file, model_checkpoint_name)
     

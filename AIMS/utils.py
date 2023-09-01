@@ -21,11 +21,18 @@ def download(ID, fold, out_dir):
         
 
 def download_parameters_FLAIR_T2_T1_orig_model(fold, out_dir):
-    ID = '8037554'
+    ID = '8307627'
     download(ID, fold, out_dir)
-        
 
-def maybe_download_parameters(model_name='FLAIR_T2_T1_orig', fold=0, force_overwrite=False):
+def download_parameters_FLAIR_T2_orig_model(fold, out_dir):
+    ID = '8307662'
+    download(ID, fold, out_dir)
+
+def download_parameters_FLAIR_T2_T1_TL_model(fold, out_dir):
+    ID = '8307667'
+    download(ID, fold, out_dir)        
+
+def maybe_download_parameters(model_name='FLAIR_T2_T1_TL', fold=0, force_overwrite=False):
     """
     Downloads the parameters for some fold if it is not present yet.
     :param fold:
@@ -34,9 +41,11 @@ def maybe_download_parameters(model_name='FLAIR_T2_T1_orig', fold=0, force_overw
     """
     trained_models = {
         'FLAIR_T2_T1_orig': download_parameters_FLAIR_T2_T1_orig_model,
+        'FLAIR_T2_T1_TL': download_parameters_FLAIR_T2_T1_TL_model,
+        'FLAIR_T2_orig': download_parameters_FLAIR_T2_orig_model,
     }
 
-    assert 0 <= fold <= 3, "fold must be between 0 and 3"
+    assert 0 <= fold <= 4, "fold must be between 0 and 3"
     assert model_name in trained_models, "selected model is not available"
 
     model_folder_with_parameter_files = os.path.join(folder_with_parameter_files, model_name, f'fold_{fold}')

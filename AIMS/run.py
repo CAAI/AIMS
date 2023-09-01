@@ -5,7 +5,7 @@ import os
 
 def run_AIMS(MRIs, output_file, model_checkpoint_name):
     
-    for i in range(4):
+    for i in range(5):
         maybe_download_parameters(model_checkpoint_name, i)
 
     model_dir = os.path.join(folder_with_parameter_files, model_checkpoint_name)
@@ -14,7 +14,7 @@ def run_AIMS(MRIs, output_file, model_checkpoint_name):
     
 def run_AIMS_from_folder(input_folder, output_folder, model_checkpoint_name, processes=4, overwrite_existing=True):
     
-    for i in range(4):
+    for i in range(5):
         maybe_download_parameters(model_checkpoint_name, i)
 
     model_dir = os.path.join(folder_with_parameter_files, model_checkpoint_name)

@@ -7,6 +7,13 @@ enablePrint()
 import argparse
 import os
 
+
+"""
+
+AIMS_folder assumes you have preprocessed files saved in nnUNet format (*_000X.nii.gz where X is sequence number and * is the patient ID)
+
+"""
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input_folder", type=str, required=True,
@@ -30,6 +37,9 @@ def main():
                              "(useful if something crashes). If True then all segmentations that may already be "
                              "present in output_folder will be overwritten. Default: True")
 
+    parser.add_argument("-m", "--model_name", type=str, required=False,
+                        help="Choose the model name manually. Options: FLAIR_T2_T1_TL (default), FLAIR_T2_T1_orig, FLAIR_T2_orig")
+
     args = parser.parse_args()
     input_folder = args.input_folder
     output_folder = args.output_folder
@@ -37,11 +47,12 @@ def main():
     overwrite_existing = args.overwrite_existing
 
     if any([f.endswith('_0002.nii.gz') for f in os.listdir(input_folder)]):
-        model_checkpoint_name = 'FLAIR_T2_T1_orig'
+        model_checkpoint_name = 'FLAIR_T2_T1_TL' if args.model_name is None else args.model_name
     elif any([f.endswith('_0001.nii.gz') for f in os.listdir(input_folder)]):
         model_checkpoint_name = 'FLAIR_T2_orig'
+        assert args.model_name is None or model_checkpoint_name == args.model_name, 'You selected a model that requires T1, but this image was not supplied.' 
     elif any([f.endswith('_0000.nii.gz') for f in os.listdir(input_folder)]):
-        model_checkpoint_name = 'FLAIR_orig'
+        model_checkpoint_name = 'FLAIR_orig' # Not yet implemented
 
     run_AIMS_from_folder(input_folder, output_folder, model_checkpoint_name, processes, overwrite_existing)
 
